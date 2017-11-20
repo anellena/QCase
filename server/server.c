@@ -10,7 +10,7 @@
 #include "xmlRequests.h"
 
 
-int testUpdateRequest(char *filePath) {
+int testRequest(char *filePath) {
 	FILE *testXml = fopen(filePath, "r");
 	if (testXml == NULL) {
 		printf("Could not open file: %m\n");
@@ -27,7 +27,10 @@ int testUpdateRequest(char *filePath) {
 	fread(xmlContent, size, 1, testXml);
 	printf("xml content: %s", xmlContent);
 
-	processXml(xmlContent, size, NULL);
+	char *response = NULL;
+	processXml(xmlContent, size, &response);
+	if (response != NULL)
+		printf("Response: %s\n", response);
 
 	free(xmlContent);
 	fclose(testXml);
@@ -37,7 +40,10 @@ int testUpdateRequest(char *filePath) {
 
 int main() {
 	// TODO - what would be the better way to work with this path?
-	testUpdateRequest("/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml");
+	testRequest("/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml");
+	testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveAll.xml");
+	testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml");
+
 
 	printf("Starting the project.\n");
 

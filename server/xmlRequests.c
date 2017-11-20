@@ -6,11 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ezxml.h>
+#include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #define TAG_UPDATE 	 "update"
 #define TAG_RETRIEVE "retrieve"
 #define TAG_STATUS   "status"
+#define TAG_KEY      "key"
 
 enum requestType {
 	UpdateRequest,
@@ -20,6 +23,71 @@ enum requestType {
 typedef enum requestType _requestType;
 
 #define STORED_XML_FILENAME "/home/anellena/QAssignment/QCase/tests/storedXml.xml"
+
+// TODO - for now I am accepting a request that contains tags not named key
+bool tagInRequest(ezxml_t receivedXml, ezxml_t tag) {
+	ezxml_t nextTag = receivedXml->child;
+
+	while(nextTag) {
+		if (strcmp(TAG_KEY, nextTag->name) == 0 && strcmp(tag->name, nextTag->txt) == 0)
+			return true;
+
+		nextTag = nextTag->next;
+	}
+
+	return false;
+}
+
+int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlResponseBuffer) {
+	ezxml_t nextStoredTag, nextReceivedTag;
+	bool retrieveAll = false;
+
+	assert(xmlResponseBuffer != NULL);
+
+	printf("Will process retrieve request\n");
+
+	nextStoredTag = storedXml->child;
+	if (nextStoredTag == NULL) {
+		printf("There is no information stored to send.");
+		return -1;
+	}
+
+	nextReceivedTag = receivedXml->child;
+	// If no child, then means retrieve all
+	if (nextReceivedTag == NULL) {
+		retrieveAll = true;
+	}
+
+	ezxml_t responseXml = ezxml_new(TAG_STATUS);
+	int countStoredTags = 0;
+	while (nextStoredTag) {
+		if (retrieveAll || tagInRequest(receivedXml, nextStoredTag)) {
+			ezxml_t newTag = ezxml_add_child(responseXml, nextStoredTag->name, 0);
+			newTag = ezxml_set_txt(newTag, nextStoredTag->txt);
+		}
+		countStoredTags++;
+		nextStoredTag = nextStoredTag->sibling;
+	}
+
+	if (!retrieveAll) {
+		int countReceivedTags = 0;
+		while (nextReceivedTag) {
+			countReceivedTags++;
+			nextReceivedTag = nextReceivedTag->sibling;
+		}
+		if (countStoredTags < countReceivedTags) {
+			printf("Invalid request, asking for tags that we do not have stored.");
+			// free things
+			return -1;
+		}
+	}
+
+	*xmlResponseBuffer = ezxml_toxml(responseXml);
+	printf("Response XML: %s\n", *xmlResponseBuffer);
+
+	// free things
+	return 0;
+}
 
 // TODO - document function
 int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
@@ -34,19 +102,15 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 		return -1;
 	}
 
-	//open stored XML file for writing - move to inside update function
 	xmlFile = fopen(STORED_XML_FILENAME, "w");
 	if (xmlFile == NULL) {
-		printf("Could not open file for writing.\n");
+		printf("Could not open file for writing: %m.\n");
 		ezxml_free(storedXml);
 		return -1;
 	}
 
-	printf("%d\n", __LINE__);
-
 	while (nextChildTag) {
 		char *tagName = nextChildTag->name;
-		printf("Next child name: %s - %d\n", nextChildTag->name, __LINE__);
 		ezxml_t storedTag = ezxml_get(storedXml, tagName, -1);
 
 		if (storedTag == NULL) {
@@ -75,20 +139,15 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	return 0;
 }
 
-// TODO - this is not read yet
-int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlResponseBuffer) {
-	// TODO
-	return 0;
-}
-
-
 int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponseBuffer) {
 	FILE *storedXml;
+
+	printf("%d\n", __LINE__);
 
 	//open stored XML file for reading
 	storedXml = fopen(STORED_XML_FILENAME, "r");
 	if (storedXml == NULL) {
-		printf("Could not open file for reading.\n");
+		printf("Could not open file for reading: %m.\n");
 		return -1;
 	}
 
@@ -114,29 +173,28 @@ int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponse
 // TODO - document function
 int processXml(char *xmlContent, int xmlLen, char **xmlResponseBuffer) {
 	ezxml_t receivedXml;
-	int result = 0;
 
 	assert(xmlContent != NULL);
 
 	receivedXml = ezxml_parse_str(xmlContent, xmlLen);
-	if (receivedXml != NULL) {
-		printf("First child: %s\n", receivedXml->name);
+	if (receivedXml == NULL) {
+		return -1;
+	}
+	printf("First child: %s\n", receivedXml->name);
 
-		if (strcmp(TAG_UPDATE, receivedXml->name) == 0) {
-			result = processRequest(receivedXml, UpdateRequest, xmlResponseBuffer);
-			*xmlResponseBuffer = NULL;
-		}
-		else if (strcmp(TAG_RETRIEVE, receivedXml->name) == 0)
-			result = processRequest(receivedXml, RetrieveRequest, xmlResponseBuffer);
-		else
-			result = -1;
+
+	if (strcmp(TAG_UPDATE, receivedXml->name) == 0) {
+		printf("Update request\n");
+		return processRequest(receivedXml, UpdateRequest, xmlResponseBuffer);
+	}
+	else if (strcmp(TAG_RETRIEVE, receivedXml->name) == 0) {
+		printf("Retrieve request\n");
+		return processRequest(receivedXml, RetrieveRequest, xmlResponseBuffer);
 	}
 	else {
-		//log error
-		result = -1;
+		printf("Invalid request\n");
+		return -1;
 	}
-
-	return result;
 }
 
 
