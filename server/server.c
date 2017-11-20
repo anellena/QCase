@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 #include "xmlRequests.h"
+#include "connection.h"
 
 
 int testRequest(char *filePath) {
@@ -40,12 +41,10 @@ int testRequest(char *filePath) {
 
 int main() {
 	// TODO - what would be the better way to work with this path?
-	testRequest("/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml");
-	testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveAll.xml");
-	testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml");
+	//testRequest("/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml");
+	//testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveAll.xml");
+	//testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml");
 
-
-	printf("Starting the project.\n");
-
+	waitForConnection();
 	return 0;
 }
