@@ -25,7 +25,11 @@ typedef enum requestType _requestType;
 #define STORED_XML_FILENAME "/home/anellena/QAssignment/QCase/tests/storedXml.xml"
 
 // TODO - for now I am accepting a request that contains tags not named key
-bool tagInRequest(ezxml_t receivedXml, ezxml_t tag) {
+
+/*
+ * Iterate through the tags of the received XML to identify if tag is on it.
+ */
+bool tagInRetrieveRequest(ezxml_t receivedXml, ezxml_t tag) {
 	ezxml_t nextTag = receivedXml->child;
 
 	while(nextTag) {
@@ -38,6 +42,9 @@ bool tagInRequest(ezxml_t receivedXml, ezxml_t tag) {
 	return false;
 }
 
+/*
+ * Process a xml to execute a retrieve request.
+ */
 int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlResponseBuffer) {
 	ezxml_t nextStoredTag, nextReceivedTag;
 	bool retrieveAll = false;
@@ -61,7 +68,7 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
 	ezxml_t responseXml = ezxml_new(TAG_STATUS);
 	int countStoredTags = 0;
 	while (nextStoredTag) {
-		if (retrieveAll || tagInRequest(receivedXml, nextStoredTag)) {
+		if (retrieveAll || tagInRetrieveRequest(receivedXml, nextStoredTag)) {
 			ezxml_t newTag = ezxml_add_child(responseXml, nextStoredTag->name, 0);
 			newTag = ezxml_set_txt(newTag, nextStoredTag->txt);
 		}
@@ -89,7 +96,9 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
 	return 0;
 }
 
-// TODO - document function
+/*
+ * Process a xml to execute an update request.
+ */
 int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	FILE *xmlFile;
 	ezxml_t nextChildTag;
@@ -139,6 +148,9 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	return 0;
 }
 
+/*
+ * Initialize files and structures for executing requests.
+ */
 int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponseBuffer) {
 	FILE *storedXml;
 
@@ -170,7 +182,9 @@ int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponse
 	return result;
 }
 
-// TODO - document function
+/*
+ * see xmlRequests.h
+ */
 int processXml(char *xmlContent, int xmlLen, char **xmlResponseBuffer) {
 	ezxml_t receivedXml;
 
