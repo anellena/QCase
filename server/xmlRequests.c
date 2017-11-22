@@ -124,11 +124,13 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 
 		if (storedTag == NULL) {
 			// create new tag
+			//printf("nextChildTag->name received: %s.\n", nextChildTag->name);
 			ezxml_t newTag = ezxml_add_child(storedXml, nextChildTag->name, 0);
 			newTag = ezxml_set_txt(newTag, nextChildTag->txt);
 		}
 		else {
 			// update existing tag
+			//printf("Existing tag: %s.\n", nextChildTag->name);
 			ezxml_set_txt(storedTag, nextChildTag->txt);
 		}
 		nextChildTag = nextChildTag->sibling;
@@ -153,8 +155,6 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
  */
 int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponseBuffer) {
 	FILE *storedXml;
-
-	printf("%d\n", __LINE__);
 
 	//open stored XML file for reading
 	storedXml = fopen(STORED_XML_FILENAME, "r");
@@ -191,11 +191,10 @@ int processXml(char *xmlContent, int xmlLen, char **xmlResponseBuffer) {
 	assert(xmlContent != NULL);
 
 	receivedXml = ezxml_parse_str(xmlContent, xmlLen);
-	if (receivedXml == NULL) {
+	if (receivedXml == NULL || receivedXml->name == NULL) {
 		return -1;
 	}
 	printf("First child: %s\n", receivedXml->name);
-
 
 	if (strcmp(TAG_UPDATE, receivedXml->name) == 0) {
 		printf("Update request\n");
