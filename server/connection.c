@@ -68,14 +68,19 @@ static int connectedSocketAdd(struct connected_socket* cs, int newFD){
 
 static void connectedSocketProcessData(struct connected_socket* cs, fd_set* set){
     char buffer[BUFFER_SIZE];
-    char *response;
+    char *response = NULL;
     for(int i = 0; i < MAX_CONN; i++){
         //printf("Data? %d %d\n", cs[i].used, FD_ISSET(cs[i].fd, set));
         if (cs[i].used && FD_ISSET(cs[i].fd, set)) {
             int received = recv(cs[i].fd, &buffer, BUFFER_SIZE, 0);
             if (received > 0){
                 printf("Received %d bytes (%.*s) from %d.\n", received, received, buffer, cs[i].fd);
-                processXml(buffer, received, &response);
+                int res = processXml(buffer, received, &response);
+                if (res < 0) {
+                	printf("Connection %d closed.\n", cs[i].fd);
+                	close(cs[i].fd);
+                	cs[i].used = 0;
+                }
                 if (response != NULL) {
                 	int sent = send(cs[i].fd, response, strlen(response)+1, 0);
                 	free(response);
@@ -104,6 +109,10 @@ static void connectedSocketClose(struct connected_socket* cs){
     }
 }
 
+/*
+ * Waits for a connection to receive a request.
+ * Can handle up to a limited number of connections at the same time.
+ */
 int waitForConnection() {
     struct sockaddr_in addrServer;
     int listenSocket;
