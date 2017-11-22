@@ -74,21 +74,22 @@ static void connectedSocketProcessData(struct connected_socket* cs, fd_set* set)
         if (cs[i].used && FD_ISSET(cs[i].fd, set)) {
             int received = recv(cs[i].fd, &buffer, BUFFER_SIZE, 0);
             if (received > 0){
-                printf("Received %d bytes (%.*s) from %d.\n", received, received, buffer, cs[i].fd);
+            	buffer[received] = '\0';
+                printf("Received %d bytes (%s) from %d.\n\n", received, buffer, cs[i].fd);
                 int res = processXml(buffer, received, &response);
                 if (res < 0) {
-                	printf("Connection %d closed.\n", cs[i].fd);
+                	printf("Connection %d closed.\n\n", cs[i].fd);
                 	close(cs[i].fd);
                 	cs[i].used = 0;
                 }
                 if (response != NULL) {
-                	int sent = send(cs[i].fd, response, strlen(response)+1, 0);
+                	send(cs[i].fd, response, strlen(response)+1, 0);
                 	free(response);
                 }
             }
             else {
                 if(received == 0){
-                    printf("Connection %d closed.\n", cs[i].fd);
+                    printf("Connection %d closed.\n\n", cs[i].fd);
                 }
                 else{
                     printf("Error receiving from %d: %m.\n", cs[i].fd);
@@ -162,11 +163,11 @@ int waitForConnection() {
                 int newConnection = accept(listenSocket, NULL, NULL);
                 if (newConnection != -1){
                     if (connectedSocketAdd(connData, newConnection) == -1){
-                        printf("Error, we have no more connection slots.\n");
+                        printf("Error, we have no more connection slots.\n\n");
                         close(newConnection);
                     }
                     else{
-                        printf("New connection!\n");
+                        printf("New connection!\n\n");
                     }
                 }
                 else{

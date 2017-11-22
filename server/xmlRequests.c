@@ -24,8 +24,6 @@ typedef enum requestType _requestType;
 
 #define STORED_XML_FILENAME "/home/anellena/QAssignment/QCase/tests/storedXml.xml"
 
-// TODO - for now I am accepting a request that contains tags not named key
-
 /*
  * Iterate through the tags of the received XML to identify if tag is on it.
  */
@@ -51,7 +49,7 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
 
 	assert(xmlResponseBuffer != NULL);
 
-	printf("Will process retrieve request\n");
+	printf("Processing retrieve request...\n");
 
 	nextStoredTag = storedXml->child;
 	if (nextStoredTag == NULL) {
@@ -66,33 +64,26 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
 	}
 
 	ezxml_t responseXml = ezxml_new(TAG_STATUS);
-	int countStoredTags = 0;
+	int countResponseTags = 0;
 	while (nextStoredTag) {
 		if (retrieveAll || tagInRetrieveRequest(receivedXml, nextStoredTag)) {
 			ezxml_t newTag = ezxml_add_child(responseXml, nextStoredTag->name, 0);
 			newTag = ezxml_set_txt(newTag, nextStoredTag->txt);
+			countResponseTags++;
 		}
-		countStoredTags++;
 		nextStoredTag = nextStoredTag->sibling;
 	}
 
-	if (!retrieveAll) {
-		int countReceivedTags = 0;
-		while (nextReceivedTag) {
-			countReceivedTags++;
-			nextReceivedTag = nextReceivedTag->sibling;
-		}
-		if (countStoredTags < countReceivedTags) {
-			printf("Invalid request, asking for tags that we do not have stored.");
-			// free things
-			return -1;
-		}
+	if (countResponseTags == 0) {
+		printf("Invalid request, none of the stored tags match the retrieve criteria.\n");
+		return -1;
 	}
 
 	*xmlResponseBuffer = ezxml_toxml(responseXml);
 	printf("Response XML: %s\n", *xmlResponseBuffer);
 
-	// free things
+
+	printf("Finished update request.\n");
 	return 0;
 }
 
@@ -103,7 +94,7 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	FILE *xmlFile;
 	ezxml_t nextReceivedTag;
 
-	printf("Will process update request\n");
+	printf("Processing update request...\n");
 
 	nextReceivedTag = receivedXml->child;
 	if (nextReceivedTag == NULL) {
@@ -152,6 +143,8 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 
 	free(updatedXml);
 	fclose(xmlFile);
+
+	printf("Finished update request.\n");
 	return 0;
 }
 
@@ -199,14 +192,13 @@ int processXml(char *xmlContent, int xmlLen, char **xmlResponseBuffer) {
 	if (receivedXml == NULL || receivedXml->name == NULL) {
 		return -1;
 	}
-	printf("First child: %s\n", receivedXml->name);
 
 	if (strcmp(TAG_UPDATE, receivedXml->name) == 0) {
-		printf("Update request\n");
+		printf("Update request.\n");
 		return processRequest(receivedXml, UpdateRequest, xmlResponseBuffer);
 	}
 	else if (strcmp(TAG_RETRIEVE, receivedXml->name) == 0) {
-		printf("Retrieve request\n");
+		printf("Retrieve request.\n");
 		return processRequest(receivedXml, RetrieveRequest, xmlResponseBuffer);
 	}
 	else {
