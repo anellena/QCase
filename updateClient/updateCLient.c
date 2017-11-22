@@ -58,6 +58,7 @@ static int sendtestFile(int fileIdx, int sockfd) {
 static int testUpdate() {
 	for (int i=0; i<N_UPDATE_TESTS; i++) {
 		printf("---------------- BEGIN TEST %d ----------------\n", i);
+		printf("File name: %s\n", testUpdateFiles[i]);
 
 		struct sockaddr_in servAddr;
 
@@ -89,6 +90,7 @@ static int testUpdate() {
 		else {
 			// Last test sends two files before closing the connection
 			if (i == N_UPDATE_TESTS - 1) {
+				printf("File name: %s\n", testUpdateFiles[i]);
 				sendtestFile(i+1, sockfd);
 			}
 		}
