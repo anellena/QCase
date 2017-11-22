@@ -70,7 +70,6 @@ static void connectedSocketProcessData(struct connected_socket* cs, fd_set* set)
     char buffer[BUFFER_SIZE];
     char *response = NULL;
     for(int i = 0; i < MAX_CONN; i++){
-        //printf("Data? %d %d\n", cs[i].used, FD_ISSET(cs[i].fd, set));
         if (cs[i].used && FD_ISSET(cs[i].fd, set)) {
             int received = recv(cs[i].fd, &buffer, BUFFER_SIZE, 0);
             if (received > 0){
@@ -159,24 +158,23 @@ int waitForConnection() {
         connectedSocketSetFDs(connData, &rfds);
         int res = select(maxFD, &rfds, NULL, NULL, &timeout);
         if (res > 0){
-            if (FD_ISSET(listenSocket, &rfds)){
+            if (FD_ISSET(listenSocket, &rfds)) {
                 int newConnection = accept(listenSocket, NULL, NULL);
                 if (newConnection != -1){
-                    if (connectedSocketAdd(connData, newConnection) == -1){
+                    if (connectedSocketAdd(connData, newConnection) == -1) {
                         printf("Error, we have no more connection slots.\n\n");
                         close(newConnection);
                     }
-                    else{
+                    else {
                         printf("New connection!\n\n");
                     }
                 }
-                else{
+                else {
                     printf("Error accepting a new connection %m\n");
                 }
             }
             connectedSocketProcessData(connData, &rfds);
         }
-        fflush(stdout);
     }
 
     printf("Finishing the server.\n");

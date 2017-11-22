@@ -18,14 +18,14 @@
 
 #define N_UPDATE_TESTS	6
 char *testUpdateFiles[N_UPDATE_TESTS+1] = {
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateEmpty.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateInvalid.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateNoKeys.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateNoValue.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK1of2.xml",
-							"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK2of2.xml"
-							};
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateEmpty.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateInvalid.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateNoKeys.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateNoValue.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK1of2.xml",
+	"/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK2of2.xml"
+};
 
 static int sendtestFile(int fileIdx, int sockfd) {
 	FILE *testXml = fopen(testUpdateFiles[fileIdx], "r");
@@ -42,7 +42,9 @@ static int sendtestFile(int fileIdx, int sockfd) {
 		xmlContent[size] = '\0';
 		printf("XML content: %s\n", xmlContent);
 
-		send(sockfd, xmlContent, size, 0);
+		if (send(sockfd, xmlContent, size, 0) <= 0) {
+			printf("Could not send data to server.\n");
+		}
 
 		free(xmlContent);
 		fclose(testXml);
