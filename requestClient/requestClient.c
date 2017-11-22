@@ -17,14 +17,20 @@
 #define SERVER_PORT 6423
 #define BUFFER_SIZE 64*1024
 
-#define N_UPDATE_TESTS	2
-char *testUpdateFiles[N_UPDATE_TESTS] = {
+#define N_UPDATE_TESTS	8
+char *testRetrieveFiles[N_UPDATE_TESTS] = {
 								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveAll.xml",
-								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml"
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveExtraKeys.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveNotStored.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveInvalid.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveNoKeys.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveWrongParent.xml",
+								"/home/anellena/QAssignment/QCase/tests/requestClients/retrieveKeyEmpty.xml"
 							};
 
 static int sendtestFile(int fileIdx, int sockfd) {
-	FILE *testXml = fopen(testUpdateFiles[fileIdx], "r");
+	FILE *testXml = fopen(testRetrieveFiles[fileIdx], "r");
 
 	if (testXml != NULL) {
 		fseek(testXml, 0, SEEK_END);
@@ -50,6 +56,9 @@ static int sendtestFile(int fileIdx, int sockfd) {
 		if (received > 0){
 			printf("Response XML: %s.\n", buffer);
 		}
+		else {
+			printf("No response.\n");
+		}
 	}
 	else {
 		printf("Could not open file for reading: %m\n");
@@ -62,6 +71,7 @@ static int sendtestFile(int fileIdx, int sockfd) {
 static int testUpdate() {
 	for (int i=0; i<N_UPDATE_TESTS; i++) {
 		printf("---------------- BEGIN TEST %d ----------------\n", i);
+		printf("File name: %s\n", testRetrieveFiles[i]);
 
 		struct sockaddr_in servAddr;
 
@@ -90,12 +100,6 @@ static int testUpdate() {
 		if (sendtestFile(i, sockfd) < 0) {
 			printf("Could not send file.\n");
 		}
-//		else {
-//			// Last test sends two files before closing the connection
-//			if (i == N_UPDATE_TESTS - 1) {
-//				sendtestFile(i+1, sockfd);
-//			}
-//		}
 
 		sleep (10);
 
