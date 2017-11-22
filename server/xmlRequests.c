@@ -101,12 +101,12 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
  */
 int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	FILE *xmlFile;
-	ezxml_t nextChildTag; // TODO - better name, must identify as the received one
+	ezxml_t nextReceivedTag;
 
 	printf("Will process update request\n");
 
-	nextChildTag = receivedXml->child;
-	if (nextChildTag == NULL) {
+	nextReceivedTag = receivedXml->child;
+	if (nextReceivedTag == NULL) {
 		printf("Received XML is invalid\n");
 		return -1;
 	}
@@ -118,27 +118,27 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 		return -1;
 	}
 
-	while (nextChildTag) {
-		char *tagName = nextChildTag->name;
+	while (nextReceivedTag) {
+		char *tagName = nextReceivedTag->name;
 
 		// Make sure tag has a value
-		if (nextChildTag->txt != NULL && (strcmp(nextChildTag->txt, "") != 0)) {
+		if (nextReceivedTag->txt != NULL && (strcmp(nextReceivedTag->txt, "") != 0)) {
 			ezxml_t storedTag = ezxml_get(storedXml, tagName, -1);
 
 			if (storedTag == NULL) {
 				// create new tag
-				//printf("nextChildTag->name received: %s.\n", nextChildTag->name);
-				ezxml_t newTag = ezxml_add_child(storedXml, nextChildTag->name, 0);
-				newTag = ezxml_set_txt(newTag, nextChildTag->txt);
+				//printf("nextReceivedTag->name received: %s.\n", nextReceivedTag->name);
+				ezxml_t newTag = ezxml_add_child(storedXml, nextReceivedTag->name, 0);
+				newTag = ezxml_set_txt(newTag, nextReceivedTag->txt);
 			}
 			else {
 				// update existing tag
-				//printf("Existing tag: %s.\n", nextChildTag->name);
-				ezxml_set_txt(storedTag, nextChildTag->txt);
+				//printf("Existing tag: %s.\n", nextReceivedTag->name);
+				ezxml_set_txt(storedTag, nextReceivedTag->txt);
 			}
 		}
 
-		nextChildTag = nextChildTag->sibling;
+		nextReceivedTag = nextReceivedTag->sibling;
 	}
 
 	char *updatedXml = ezxml_toxml(storedXml);
