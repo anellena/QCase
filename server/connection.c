@@ -1,5 +1,5 @@
 /*
- * TODO - documentation
+ * This module handles the server connection with the clients.
  *
  */
 
@@ -46,7 +46,6 @@ static int connectedSocketGetMaxFD(struct connected_socket* cs){
     return maxFD;
 }
 
-//TODO - review this
 static void connectedSocketSetFDs(struct connected_socket* cs, fd_set* set){
     for(int i = 0; i < MAX_CONN; i++){
         if (cs[i].used){

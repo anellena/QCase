@@ -1,5 +1,5 @@
 /*
- * TODO - file description
+ * This module handles the XML requests.
  *
  */
 
@@ -27,7 +27,7 @@ typedef enum requestType _requestType;
 /*
  * Iterate through the tags of the received XML to identify if tag is on it.
  */
-bool tagInRetrieveRequest(ezxml_t receivedXml, ezxml_t tag) {
+static bool tagInRetrieveRequest(ezxml_t receivedXml, ezxml_t tag) {
 	ezxml_t nextTag = receivedXml->child;
 
 	while(nextTag) {
@@ -43,7 +43,7 @@ bool tagInRetrieveRequest(ezxml_t receivedXml, ezxml_t tag) {
 /*
  * Process a xml to execute a retrieve request.
  */
-int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlResponseBuffer) {
+static int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlResponseBuffer) {
 	ezxml_t nextStoredTag, nextReceivedTag;
 	bool retrieveAll = false;
 
@@ -93,7 +93,7 @@ int processRetrieveRequest(ezxml_t storedXml, ezxml_t receivedXml, char **xmlRes
 /*
  * Process a xml to execute an update request.
  */
-int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
+static int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 	FILE *xmlFile;
 	ezxml_t nextReceivedTag;
 
@@ -155,7 +155,7 @@ int processUpdateRequest(ezxml_t storedXml, ezxml_t receivedXml) {
 /*
  * Initialize files and structures for executing requests.
  */
-int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponseBuffer) {
+static int processRequest(ezxml_t receivedXml, _requestType request, char **xmlResponseBuffer) {
 	FILE *storedXml;
 
 	//open stored XML file for reading

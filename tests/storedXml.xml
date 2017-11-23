@@ -1,1 +1,5 @@
-<valuesStored><humidity>52</humidity><personsPassed>12</personsPassed><lightCondition>bright</lightCondition></valuesStored>
+<status><temperature>21</temperature>
+<personsPassed>24</personsPassed>
+<lightCondition>dark</lightCondition>
+<humidity>60</humidity>
+</status>

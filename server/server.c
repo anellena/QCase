@@ -1,5 +1,6 @@
 /*
- * TODO - file description
+ * Server that waits to receive XML files from clients with requests to update
+ * its parameters or to retrieve their current value.
  *
  */
 
@@ -40,7 +41,6 @@ int testRequest(char *filePath) {
 }
 
 int main() {
-	// TODO - what would be the better way to work with this path?
 	//testRequest("/home/anellena/QAssignment/QCase/tests/measuringClients/updateOK.xml");
 	//testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveAll.xml");
 	//testRequest("/home/anellena/QAssignment/QCase/tests/requestClients/retrieveSome.xml");

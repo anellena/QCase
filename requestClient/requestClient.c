@@ -1,5 +1,5 @@
 /*
- * TODO - file description
+ * Mock a client sending retrieve requests to the server every 15 minutes.
  *
  */
 
